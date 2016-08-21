@@ -26,38 +26,49 @@
 
 
 // instert Multiple Record For Table
+
 func insterts(table:String,datas:[Dictionary<String,AnyObject>])
 
 
 // update One Record For Table
+
 func update(table:String,data:Dictionary<String,AnyObject>)
 
 // update Multiple Record For Table
+
 func updates(table:String,datas:[Dictionary<String,AnyObject>])
 
 // delete One Record For Table
+
 func delete(table:String,data:Dictionary<String,AnyObject>)
 
 // delete Multiple Record For Table
+
 func delete(table:String,datas:[Dictionary<String,AnyObject>])
 
 // delete Match Datas
+
 func delete(SQL:String,values:[AnyObject])
 
 // delete Where
+
 func delete(table:String,Whree:String,values:[AnyObject])
 
 
 // delete All Record For Table
+
 func delete(table:String)
 
 // load All Record For Table
+
 func load(table:String)->[Dictionary<String,AnyObject>]
 
 // load Data With SQL
+
 func load(SQL:String,value:[AnyObject])->[Dictionary<String,AnyObject>]
 
 // load Match Datas Form Table And Wheree 
+
 func load(table:String,Where:String,value:[AnyObject])->[Dictionary<String,AnyObject>]{
 
 
