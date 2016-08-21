@@ -1,4 +1,4 @@
-# SQLite
+# SQLiteManager
 
 
 這是一個封裝 FMDB 的工具類
