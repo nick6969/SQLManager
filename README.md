@@ -7,6 +7,9 @@
 
 記得要先 pod 'FMDB'
 
+// 直接將 SQLManager.swift 拉近您的專案即可使用
+
+使用方法如下：
 
 首先創建一個 Class 符合 SQLDelegate
 
