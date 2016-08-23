@@ -11,14 +11,14 @@ import FMDB
 
 @objc protocol SQLDelegate {
     
-    // all table's primarykey
+    /// all table's primarykey
     func tablePrimaryKey(table :String)->String
     
-    // use createDB need set this Array , This is Create table SQL
+    /// use createDB need set this Array , This is Create table SQL
     @objc optional var SQL : [String] { get }
     
     
-    // DataBase Sqlite File Name and Path
+    /// DataBase Sqlite File Name and Path
     var dbPathName : String { get }
 }
 
@@ -35,7 +35,7 @@ class SQLiteManager {
         self.delegate = delegate
     }
     
-    //Create Database
+    /// Create Database
     func createDB(){
         let dbPath = NSHomeDirectory().stringByAppendingString("/Documents" + delegate!.dbPathName)
         if !NSFileManager.defaultManager().fileExistsAtPath(dbPath){
@@ -61,7 +61,7 @@ class SQLiteManager {
     }
 
     
-    // load Datebase
+    /// load Datebase
     func loadDB(){
         let dbPath = NSHomeDirectory().stringByAppendingString("/Documents" + delegate!.dbPathName)
         print(dbPath)
@@ -77,7 +77,7 @@ class SQLiteManager {
         dbQuece = FMDatabaseQueue(path: dbPath)
     }
     
-    // instert One Record For Table
+    /// instert One Record For Table
     func instert(table:String,data:Dictionary<String,AnyObject>){
         var name : String = ""
         var keys : String = ""
@@ -100,7 +100,7 @@ class SQLiteManager {
         }
     }
     
-    // instert Multiple Record For Table
+    /// instert Multiple Record For Table
     func insterts(table:String,datas:[Dictionary<String,AnyObject>]){
         var SQLArray : [String] = [String]()
         var valuesArray : [[AnyObject]] = []
@@ -129,7 +129,7 @@ class SQLiteManager {
         }
     }
     
-    // update One Record For Table
+    /// update One Record For Table
     func update(table:String,data:Dictionary<String,AnyObject>){
         var name : String = ""
         var values : [AnyObject] = []
@@ -153,7 +153,7 @@ class SQLiteManager {
         }
     }
     
-    // update Multiple Record For Table
+    /// update Multiple Record For Table
     func updates(table:String,datas:[Dictionary<String,AnyObject>]){
         let primarykey : String = delegate!.tablePrimaryKey(table)
         var SQLArray : [String] = [String]()
@@ -184,7 +184,7 @@ class SQLiteManager {
         }
     }
 
-    // delete One Record For Table
+    /// delete One Record For Table
     func delete(table:String,data:Dictionary<String,AnyObject>){
         let primarykey : String = delegate!.tablePrimaryKey(table)
         dbQuece.inDatabase { (db) in
@@ -197,7 +197,7 @@ class SQLiteManager {
         }
     }
     
-    // delete Multiple Record For Table
+    /// delete Multiple Record For Table
     func delete(table:String,datas:[Dictionary<String,AnyObject>]){
         let primarykey : String = delegate!.tablePrimaryKey(table)
         dbQuece.inTransaction { (db, nil) in
@@ -212,7 +212,7 @@ class SQLiteManager {
         }
     }
 
-    // delete Match Datas
+    /// delete Match Datas
     func delete(SQL:String,values:[AnyObject]){
         dbQuece.inDatabase { (db) in
             do {
@@ -224,7 +224,7 @@ class SQLiteManager {
         }
     }
     
-    // delete Where
+    /// delete Where
     func delete(table:String,Whree:String,values:[AnyObject]){
         dbQuece.inDatabase { (db) in
             do {
@@ -237,7 +237,7 @@ class SQLiteManager {
     }
     
     
-    // delete All Record For Table
+    /// delete All Record For Table
     func delete(table:String){
         dbQuece.inDatabase { (db) in
             do {
@@ -249,7 +249,7 @@ class SQLiteManager {
         }
     }
     
-    // load All Record For Table
+    /// load All Record For Table
     func load(table:String)->[Dictionary<String,AnyObject>]{
         var data : [Dictionary<String,AnyObject>] = [Dictionary<String,AnyObject>]()
         dbQuece.inDatabase { (db) in
@@ -270,7 +270,7 @@ class SQLiteManager {
         return data
     }
     
-    // load Data With SQL
+    /// load Data With SQL
     func load(SQL:String,value:[AnyObject])->[Dictionary<String,AnyObject>]{
         var data : [Dictionary<String,AnyObject>] = [Dictionary<String,AnyObject>]()
         dbQuece.inDatabase { (db) in
@@ -290,7 +290,7 @@ class SQLiteManager {
         return data
     }
     
-    // load Match Datas Form Table And Wheree 
+    /// load Match Datas Form Table And Wheree
     func load(table:String,Where:String,value:[AnyObject])->[Dictionary<String,AnyObject>]{
         var data : [Dictionary<String,AnyObject>] = [Dictionary<String,AnyObject>]()
         dbQuece.inDatabase { (db) in
