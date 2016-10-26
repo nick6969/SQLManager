@@ -37,8 +37,9 @@ class SQLiteManager {
     
     /// Create Database
     func createDB(){
-        let dbPath = NSHomeDirectory().stringByAppendingString("/Documents" + delegate!.dbPathName)
-        if !NSFileManager.defaultManager().fileExistsAtPath(dbPath){
+        
+        let dbPath = NSHomeDirectory().appending("/Documents" + delegate!.dbPathName)
+        if !FileManager.default.fileExists(atPath:dbPath){
             if delegate!.SQL != nil {
                 dbQuece = FMDatabaseQueue(path: dbPath)
                 dbQuece.inTransaction { (db, nil) in
@@ -51,6 +52,7 @@ class SQLiteManager {
                         print(error)
                     }
                 }
+                dbQuece = FMDatabaseQueue(path: dbPath)
             }else{
                 fatalError("Use createDB need Confrom Delegate 'var SQL : [String]' ")
             }
@@ -63,18 +65,17 @@ class SQLiteManager {
     
     /// load Datebase
     func loadDB(){
-        let dbPath = NSHomeDirectory().stringByAppendingString("/Documents" + delegate!.dbPathName)
-        print(dbPath)
-        let defaultPath = NSBundle.mainBundle().resourcePath!.stringByAppendingString(delegate!.dbPathName)
-        
-        if !NSFileManager.defaultManager().fileExistsAtPath(dbPath){
+        let dbPath = NSHomeDirectory().appending("/Documents" + delegate!.dbPathName)
+        let defaultPath = Bundle.main.resourcePath!.appending(delegate!.dbPathName)
+        if !FileManager.default.fileExists(atPath:dbPath){
             do{
-                try NSFileManager.defaultManager().copyItemAtPath(defaultPath, toPath: dbPath)
+                try FileManager.default.copyItem(atPath: defaultPath, toPath: dbPath)
             }catch{
                 print(error)
             }
         }
         dbQuece = FMDatabaseQueue(path: dbPath)
+
     }
     
     /// instert One Record For Table
@@ -83,12 +84,11 @@ class SQLiteManager {
         var keys : String = ""
         var values : [AnyObject] = []
         
-        for (i,(key,value)) in data.enumerate(){
+        for (offset:i,(key:key,value:value)) in data.enumerated(){
             name = i == 0 ? "(" + key : ( i == data.keys.count-1 ? name + "," + key + ")" : name + "," + key )
             keys = i == 0 ? "(" + "?" : ( i == data.keys.count-1 ? keys + ",?)" : keys + ",?" )
             values.append(value)
         }
-
         let SQL : String = "INSERT INTO \(table) \(name) values \(keys)"
         dbQuece.inDatabase { (db) in
             do {
@@ -108,7 +108,7 @@ class SQLiteManager {
             var name : String = ""
             var keys : String = ""
             var values : [AnyObject] = []
-            for (i,(key,value)) in dd.enumerate(){
+            for (offset:i,(key:key,value:value)) in dd.enumerated(){
                 name = i == 0 ? "(" + key : ( i == dd.keys.count-1 ? name + "," + key + ")" : name + "," + key )
                 keys = i == 0 ? "(" + "?" : ( i == dd.keys.count-1 ? keys + ",?)" : keys + ",?" )
                 values.append(value)
@@ -133,16 +133,16 @@ class SQLiteManager {
     func update(table:String,data:Dictionary<String,AnyObject>){
         var name : String = ""
         var values : [AnyObject] = []
-        let primarykey : String = delegate!.tablePrimaryKey(table)
-        for (i,(key,value)) in data.enumerate(){
+        let primarykey : String = delegate!.tablePrimaryKey(table: table)
+        for (offset:_,(key:key,value:value)) in data.enumerated(){
             if key != primarykey{
-                name = i != data.keys.count-1 ? name + key + " = ? ," : name + key + " = ? "
+                name += key + " = ? ,"
                 values.append(value)
             }
         }
+        name.characters.removeLast()
         values.append(data[primarykey]!)
         let SQL : String = "UPDATE \(table) SET \(name) WHERE \(primarykey) = ?"
-
         dbQuece.inDatabase { (db) in
             do {
                 try db!.executeUpdate(SQL, values: values)
@@ -155,18 +155,19 @@ class SQLiteManager {
     
     /// update Multiple Record For Table
     func updates(table:String,datas:[Dictionary<String,AnyObject>]){
-        let primarykey : String = delegate!.tablePrimaryKey(table)
+        let primarykey : String = delegate!.tablePrimaryKey(table: table)
         var SQLArray : [String] = [String]()
         var valuesArray : [[AnyObject]] = []
         for dd in datas{
             var name : String = ""
             var values : [AnyObject] = []
-            for (i,(key,value)) in dd.enumerate(){
+            for (offset:_,(key:key,value:value)) in dd.enumerated(){
                 if key != primarykey{
-                    name = i != dd.keys.count-1 ? name + key + " = ? ," : name + key + " = ? "
+                    name += key + " = ? ,"
                     values.append(value)
                 }
             }
+            name.characters.removeLast()
             values.append(dd[primarykey]!)
             SQLArray.append("UPDATE \(table) SET \(name) WHERE \(primarykey) = ?")
             valuesArray.append(values)
@@ -186,7 +187,7 @@ class SQLiteManager {
 
     /// delete One Record For Table
     func delete(table:String,data:Dictionary<String,AnyObject>){
-        let primarykey : String = delegate!.tablePrimaryKey(table)
+        let primarykey : String = delegate!.tablePrimaryKey(table: table)
         dbQuece.inDatabase { (db) in
             do {
                 try db!.executeUpdate("DELETE FROM \(table) WHERE \(primarykey) = ?", values: [data[primarykey]!])
@@ -199,7 +200,7 @@ class SQLiteManager {
     
     /// delete Multiple Record For Table
     func delete(table:String,datas:[Dictionary<String,AnyObject>]){
-        let primarykey : String = delegate!.tablePrimaryKey(table)
+        let primarykey : String = delegate!.tablePrimaryKey(table: table)
         dbQuece.inTransaction { (db, nil) in
             do {
                 for data in datas{
@@ -241,7 +242,7 @@ class SQLiteManager {
     func delete(table:String){
         dbQuece.inDatabase { (db) in
             do {
-                try db!.executeUpdate("DELETE FROM \(table)", values: [])
+                try db?.executeUpdate("DELETE FROM \(table)", values: [])
             }catch{
                 print("delete error")
                 print(error)
@@ -257,8 +258,8 @@ class SQLiteManager {
                 let rs = try db!.executeQuery("SELECT * FROM \(table)", values: nil)
                 while rs.next(){
                     var dd = Dictionary<String,AnyObject>()
-                    for (key,_) in  rs.columnNameToIndexMap{
-                        dd.updateValue(rs.objectForColumnName(key as! String)!, forKey: key as! String)
+                    for (key,value) in  rs.columnNameToIndexMap{
+                        dd.updateValue(value as AnyObject, forKey: key as! String)
                     }
                     data.append(dd)
                 }
@@ -278,8 +279,8 @@ class SQLiteManager {
                 let rs = try db!.executeQuery(SQL, values: value)
                 while rs.next(){
                     var dd = Dictionary<String,AnyObject>()
-                    for (key,_) in  rs.columnNameToIndexMap{
-                        dd.updateValue(rs.objectForColumnName(key as! String)!, forKey: key as! String)
+                    for (key,value) in  rs.columnNameToIndexMap{
+                        dd.updateValue(value as AnyObject, forKey: key as! String)
                     }
                     data.append(dd)
                 }
@@ -298,8 +299,8 @@ class SQLiteManager {
                 let rs = try db!.executeQuery("SELECT * FROM \(table) WHERE " + Where, values: value)
                 while rs.next(){
                     var dd = Dictionary<String,AnyObject>()
-                    for (key,_) in  rs.columnNameToIndexMap{
-                        dd.updateValue(rs.objectForColumnName( key as! String)! , forKey: key as! String)
+                    for (key,value) in  rs.columnNameToIndexMap{
+                        dd.updateValue(value as AnyObject, forKey: key as! String)
                     }
                     data.append(dd)
                 }
