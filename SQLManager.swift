@@ -6,45 +6,58 @@
 //  Copyright © 2016年 Lin.Nick. All rights reserved.
 //
 
-import UIKit
-import FMDB
+/* Swift 3.0 Xcode 8.1 */
+/* 最後修改時間 2016/12/01 */
+/*
+ 2016/11/27 增加 SQL 語法建立輔助類
+ */
 
+import UIKit
+
+/// SQLiteManager init need
 @objc protocol SQLDelegate {
     
     /// all table's primarykey
     func tablePrimaryKey(table :String)->String
     
-    /// use createDB need set this Array , This is Create table SQL
-    @objc optional var SQL : [String] { get }
-    
+    /// Create Datebase use
+    @objc optional var SQLsyntaxs : [String]{ get }
     
     /// DataBase Sqlite File Name and Path
     var dbPathName : String { get }
 }
 
-class SQLiteManager {
+/// Quick use SQLite Datebase , init need have some class conform SQLDelegate
+class SQLiteManager: NSObject {
     /*
-        You need create new Class and this Class need conform SQLdelegate
+        You need init form init(delegate: protocol<SQLDelegate>)
     */
     
-    var delegate : SQLDelegate!
-    var dbQuece: FMDatabaseQueue!
+    private var delegate : SQLDelegate?
+    private var dbQuece: FMDatabaseQueue!
     
-    // setting Delegate
-    init(delegate:SQLDelegate) {
+    /// initialization
+    init(delegate: SQLDelegate){
+        super.init()
         self.delegate = delegate
     }
     
-    /// Create Database
+    /// Do not Use This initialization
+    private override init() {
+        fatalError("You Need Use 'init(delegate:)'")
+    }
+  
+    
+    /// load SQLite File with Path(first time will create form SQLsyntaxs)
+    /// need Confrom Delegate 'var SQLsyntaxs : [String]' "
     func createDB(){
-        
         let dbPath = NSHomeDirectory().appending("/Documents" + delegate!.dbPathName)
         if !FileManager.default.fileExists(atPath:dbPath){
-            if delegate!.SQL != nil {
+            if delegate!.SQLsyntaxs != nil {
                 dbQuece = FMDatabaseQueue(path: dbPath)
                 dbQuece.inTransaction { (db, nil) in
                     do {
-                        for S in self.delegate!.SQL!{
+                        for S in self.delegate!.SQLsyntaxs!{
                             try db!.executeUpdate(S, values: nil)
                         }
                     }catch{
@@ -54,18 +67,20 @@ class SQLiteManager {
                 }
                 dbQuece = FMDatabaseQueue(path: dbPath)
             }else{
-                fatalError("Use createDB need Confrom Delegate 'var SQL : [String]' ")
+                fatalError("Use createDB need Confrom Delegate 'var SQLsyntaxs : [String]' ")
             }
             
         }else{
             dbQuece = FMDatabaseQueue(path: dbPath)
         }
     }
-
     
-    /// load Datebase
+    
+    /// load SQLite File with Path(first time will copy form resourcePath)
     func loadDB(){
+
         let dbPath = NSHomeDirectory().appending("/Documents" + delegate!.dbPathName)
+        
         let defaultPath = Bundle.main.resourcePath!.appending(delegate!.dbPathName)
         if !FileManager.default.fileExists(atPath:dbPath){
             do{
@@ -75,15 +90,16 @@ class SQLiteManager {
             }
         }
         dbQuece = FMDatabaseQueue(path: dbPath)
-
     }
     
-    /// instert One Record For Table
-    func instert(table:String,data:Dictionary<String,AnyObject>){
+    /// instert One Record
+    ///
+    /// - parameter table: SQLite table Name
+    /// - parameter data:  instert Data with Dictionary
+    func instert(table:String,data:Dictionary<String,Any>){
         var name : String = ""
         var keys : String = ""
-        var values : [AnyObject] = []
-        
+        var values : [Any] = []
         for (offset:i,(key:key,value:value)) in data.enumerated(){
             name = i == 0 ? "(" + key : ( i == data.keys.count-1 ? name + "," + key + ")" : name + "," + key )
             keys = i == 0 ? "(" + "?" : ( i == data.keys.count-1 ? keys + ",?)" : keys + ",?" )
@@ -100,14 +116,17 @@ class SQLiteManager {
         }
     }
     
-    /// instert Multiple Record For Table
-    func insterts(table:String,datas:[Dictionary<String,AnyObject>]){
+    /// instert Multiple Record
+    ///
+    /// - parameter table: SQLite table Name
+    /// - parameter data:  instert Datas with Dictionarys
+    func instert(table:String,datas:[Dictionary<String,Any>]){
         var SQLArray : [String] = [String]()
-        var valuesArray : [[AnyObject]] = []
+        var valuesArray : [[Any]] = []
         for dd in datas{
             var name : String = ""
             var keys : String = ""
-            var values : [AnyObject] = []
+            var values : [Any] = []
             for (offset:i,(key:key,value:value)) in dd.enumerated(){
                 name = i == 0 ? "(" + key : ( i == dd.keys.count-1 ? name + "," + key + ")" : name + "," + key )
                 keys = i == 0 ? "(" + "?" : ( i == dd.keys.count-1 ? keys + ",?)" : keys + ",?" )
@@ -129,10 +148,13 @@ class SQLiteManager {
         }
     }
     
-    /// update One Record For Table
-    func update(table:String,data:Dictionary<String,AnyObject>){
+    /// update One Record
+    ///
+    /// - parameter table: SQLite table Name
+    /// - parameter data:  update Data with Dictionary
+    func update(table:String,data:Dictionary<String,Any>){
         var name : String = ""
-        var values : [AnyObject] = []
+        var values : [Any] = []
         let primarykey : String = delegate!.tablePrimaryKey(table: table)
         for (offset:_,(key:key,value:value)) in data.enumerated(){
             if key != primarykey{
@@ -152,15 +174,18 @@ class SQLiteManager {
             }
         }
     }
-    
-    /// update Multiple Record For Table
-    func updates(table:String,datas:[Dictionary<String,AnyObject>]){
+
+    /// update Multiple Record
+    ///
+    /// - parameter table: SQLite table Name
+    /// - parameter data:  update Datas with Dictionarys
+    func update(table:String,datas:[Dictionary<String,Any>]){
         let primarykey : String = delegate!.tablePrimaryKey(table: table)
         var SQLArray : [String] = [String]()
-        var valuesArray : [[AnyObject]] = []
+        var valuesArray : [[Any]] = []
         for dd in datas{
             var name : String = ""
-            var values : [AnyObject] = []
+            var values : [Any] = []
             for (offset:_,(key:key,value:value)) in dd.enumerated(){
                 if key != primarykey{
                     name += key + " = ? ,"
@@ -185,8 +210,11 @@ class SQLiteManager {
         }
     }
 
-    /// delete One Record For Table
-    func delete(table:String,data:Dictionary<String,AnyObject>){
+    /// delete One Record
+    ///
+    /// - parameter table: SQLite table Name
+    /// - parameter data:  delete Data with Dictionary
+    func delete(table:String,data:Dictionary<String,Any>){
         let primarykey : String = delegate!.tablePrimaryKey(table: table)
         dbQuece.inDatabase { (db) in
             do {
@@ -198,8 +226,11 @@ class SQLiteManager {
         }
     }
     
-    /// delete Multiple Record For Table
-    func delete(table:String,datas:[Dictionary<String,AnyObject>]){
+    /// delete Multiple Record
+    ///
+    /// - parameter table: SQLite table Name
+    /// - parameter data:  delete Datas with Dictionarys
+    func delete(table:String,datas:[Dictionary<String,Any>]){
         let primarykey : String = delegate!.tablePrimaryKey(table: table)
         dbQuece.inTransaction { (db, nil) in
             do {
@@ -213,8 +244,11 @@ class SQLiteManager {
         }
     }
 
-    /// delete Match Datas
-    func delete(SQL:String,values:[AnyObject]){
+    /// delete the match condition data
+    ///
+    /// - parameter SQL:    SQL Syntax
+    /// - parameter values: value with SQL Syntax
+    func deleteMatch(SQL:String,values:[Any]){
         dbQuece.inDatabase { (db) in
             do {
                 try db!.executeUpdate(SQL, values: values)
@@ -225,21 +259,13 @@ class SQLiteManager {
         }
     }
     
-    /// delete Where
-    func delete(table:String,Whree:String,values:[AnyObject]){
-        dbQuece.inDatabase { (db) in
-            do {
-                try db!.executeUpdate("DELETE FROM \(table) WHERE \(Whree)", values: values)
-            }catch{
-                print("delete error")
-                print(error)
-            }
-        }
-    }
     
     
-    /// delete All Record For Table
-    func delete(table:String){
+    
+    /// delete the match SQLite table Name all data
+    ///
+    /// - parameter table: SQLite table Name
+    func deleteAll(table:String){
         dbQuece.inDatabase { (db) in
             do {
                 try db?.executeUpdate("DELETE FROM \(table)", values: [])
@@ -250,16 +276,35 @@ class SQLiteManager {
         }
     }
     
-    /// load All Record For Table
-    func load(table:String)->[Dictionary<String,AnyObject>]{
-        var data : [Dictionary<String,AnyObject>] = [Dictionary<String,AnyObject>]()
+    /// delete the match SQLite table Name And
+    ///
+    /// - parameter table:  SQLite table Name
+    /// - parameter Whree:  conditon
+    /// - parameter values: value with SQL Syntax
+    func delete(table:String,Whree:String,values:[Any]){
+        dbQuece.inDatabase { (db) in
+            do {
+                try db!.executeUpdate("DELETE FROM \(table) WHERE \(Whree)", values: values)
+            }catch{
+                print("delete error")
+                print(error)
+            }
+        }
+    }
+
+    
+    /// lodaing the match SQLite table Name all data
+    ///
+    /// - parameter table: SQLite table Name
+    func loadAll(table:String)->[Dictionary<String,Any>]{
+        var data : [Dictionary<String,Any>] = [Dictionary<String,Any>]()
         dbQuece.inDatabase { (db) in
             do {
                 let rs = try db!.executeQuery("SELECT * FROM \(table)", values: nil)
                 while rs.next(){
-                    var dd = Dictionary<String,AnyObject>()
-                    for (key,value) in  rs.columnNameToIndexMap{
-                        dd.updateValue(value as AnyObject, forKey: key as! String)
+                    var dd = Dictionary<String,Any>()
+                    for (key,index) in  rs.columnNameToIndexMap{
+                        dd[key as! String] = rs.object(forColumnIndex: index as! Int32)!
                     }
                     data.append(dd)
                 }
@@ -271,16 +316,21 @@ class SQLiteManager {
         return data
     }
     
-    /// load Data With SQL
-    func load(SQL:String,value:[AnyObject])->[Dictionary<String,AnyObject>]{
-        var data : [Dictionary<String,AnyObject>] = [Dictionary<String,AnyObject>]()
+    /// load the match condition data
+    ///
+    /// - parameter Allmatch: SQL Syntax
+    /// - parameter value:    value with SQL Syntax
+    ///
+    /// - returns: load the match condition datas
+    func loadMatch(Allmatch:String,value:[Any])->[Dictionary<String,Any>]{
+        var data : [Dictionary<String,Any>] = [Dictionary<String,Any>]()
         dbQuece.inDatabase { (db) in
             do {
-                let rs = try db!.executeQuery(SQL, values: value)
+                let rs = try db!.executeQuery(Allmatch, values: value)
                 while rs.next(){
-                    var dd = Dictionary<String,AnyObject>()
-                    for (key,value) in  rs.columnNameToIndexMap{
-                        dd.updateValue(value as AnyObject, forKey: key as! String)
+                    var dd = Dictionary<String,Any>()
+                    for (key,index) in  rs.columnNameToIndexMap{
+                        dd[key as! String] = rs.object(forColumnIndex: index as! Int32)!
                     }
                     data.append(dd)
                 }
@@ -291,33 +341,65 @@ class SQLiteManager {
         return data
     }
     
-    /// load Match Datas Form Table And Wheree
-    func load(table:String,Where:String,value:[AnyObject])->[Dictionary<String,AnyObject>]{
-        var data : [Dictionary<String,AnyObject>] = [Dictionary<String,AnyObject>]()
+    /// load the match condition data with SQL table
+    ///
+    /// - parameter table: SQLite table Name
+    /// - parameter match: SQL Syntax
+    /// - parameter value: value with SQL Syntax
+    ///
+    /// - returns: load the match condition datas with SQL table
+    func loadMatch(table:String,match:String,value:[Any])->[Dictionary<String,Any>]{
+        var data : [Dictionary<String,Any>] = [Dictionary<String,Any>]()
         dbQuece.inDatabase { (db) in
             do {
-                let rs = try db!.executeQuery("SELECT * FROM \(table) WHERE " + Where, values: value)
+                let rs = try db!.executeQuery("SELECT * FROM \(table) WHERE " + match, values: value)
                 while rs.next(){
-                    var dd = Dictionary<String,AnyObject>()
-                    for (key,value) in  rs.columnNameToIndexMap{
-                        dd.updateValue(value as AnyObject, forKey: key as! String)
+                    var dd = Dictionary<String,Any>()
+                    for (key,index) in  rs.columnNameToIndexMap{
+                        dd[key as! String] = rs.object(forColumnIndex: index as! Int32)!
                     }
                     data.append(dd)
                 }
             }catch{
-                print("\(Where) error")
+                print("\(match) error")
                 print(error)
             }
         }
         return data
     }
- 
-    
+    /// dataBase Opertion
+    ///
+    /// - Parameters:
+    /// - process: SQL Syntax
+    /// - value: value with SQL Syntax
+    func opertion(process:String,value:[Any]){
+        dbQuece.inTransaction { (db, nil) in
+            do {
+                try db!.executeUpdate(process, values: value)
+            }catch{
+                print("process error")
+                print(error)
+            }
+        }
+    }
+    /// conform Database specific table has column
+    ///
+    /// - Parameters:
+    /// - Table: tableName
+    /// - Column: columnName
+    /// - Returns: isHave
+    func checkTableColumn(table Table:String,Column:String)->Bool{
+        let tables = self.loadMatch(Allmatch: "SELECT * FROM sqlite_master", value: [])
+        return tables.contains{ "\($0["name"]!)" == Table && "\($0["sql"]!)".contains(Column)}
+    }
+    /// conform Database has table
+    ///
+    /// - Parameters:
+    /// - Table: tableName
+    /// - Returns: isHave
+    func checkTable(table Table:String)->Bool{
+        let tables = self.loadMatch(Allmatch: "SELECT * FROM sqlite_master", value: [])
+        return tables.contains{ "\($0["name"]!)" == Table }
+    }
+
 }
-
-
-
-
-
-
-
