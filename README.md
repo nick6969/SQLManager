@@ -23,6 +23,7 @@
 
 若您是要在第一次進入時 創建 DB , 請使用 createDB , 並實現 delegate 裡面的 var SQLsyntaxs : [String]
 
-
+2016-12-13
+新增 SQLite 類，簡單的撰寫 創建 table 語法，並且可讀性比原本的寫法更好
 
 
