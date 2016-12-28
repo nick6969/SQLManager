@@ -33,7 +33,7 @@ import UIKit
 final class SQLite {
     private enum type {
         case create
-        case alert
+        case alter
     }
     private var count = 0
     private var syntax : String = ""
@@ -49,7 +49,7 @@ final class SQLite {
     }
     
     /// 更改 table 內容
-    convenience init(alert table: String) {
+    convenience init(alter table: String) {
         self.init()
         syntax = "ALTER TABLE '\(table)' ADD COLUMN "
         style = .alert
