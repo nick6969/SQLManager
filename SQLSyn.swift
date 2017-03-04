@@ -52,7 +52,7 @@ final class SQLite {
     convenience init(alter table: String) {
         self.init()
         syntax = "ALTER TABLE '\(table)' ADD COLUMN "
-        style = .alert
+        style = .alter
     }
     
     /// 添加欄位
