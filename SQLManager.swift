@@ -6,36 +6,35 @@
 //  Copyright © 2016年 Lin.Nick. All rights reserved.
 //
 
-/* Swift 3.0 Xcode 8.1 */
-/* 最後修改時間 2016/12/01 */
-
 
 import UIKit
+import FMDB
 
 /// SQLiteManager init need
-@objc protocol SQLDelegate {
+public protocol SQLDelegate {
     
     /// all table's primarykey
     func tablePrimaryKey(table :String)->String
     
     /// Create Datebase use
-    @objc optional var SQLsyntaxs : [String]{ get }
+    var SQLsyntaxs : [String]{ get }
     
     /// DataBase Sqlite File Name and Path
     var dbPathName : String { get }
 }
 
+
 /// Quick use SQLite Datebase , init need have some class conform SQLDelegate
-class SQLiteManager: NSObject {
+public class SQLiteManager: NSObject {
     /*
-        You need init form init(delegate: protocol<SQLDelegate>)
-    */
+     You need init form init(delegate: protocol<SQLDelegate>)
+     */
     
     private var delegate : SQLDelegate?
     private var dbQuece: FMDatabaseQueue!
     
     /// initialization
-    init(delegate: SQLDelegate){
+    public init(delegate: SQLDelegate){
         super.init()
         self.delegate = delegate
     }
@@ -44,30 +43,24 @@ class SQLiteManager: NSObject {
     private override init() {
         fatalError("You Need Use 'init(delegate:)'")
     }
-  
+    
     
     /// load SQLite File with Path(first time will create form SQLsyntaxs)
     /// need Confrom Delegate 'var SQLsyntaxs : [String]' "
-    func createDB(){
+    public func createDB(){
         let dbPath = NSHomeDirectory().appending("/Documents" + delegate!.dbPathName)
         if !FileManager.default.fileExists(atPath:dbPath){
-            if delegate!.SQLsyntaxs != nil {
-                dbQuece = FMDatabaseQueue(path: dbPath)
-                dbQuece.inTransaction { (db, nil) in
-                    do {
-                        for S in self.delegate!.SQLsyntaxs!{
-                            try db!.executeUpdate(S, values: nil)
-                        }
-                    }catch{
-                        print("create error")
-                        print(error)
+            dbQuece = FMDatabaseQueue(path: dbPath)
+            dbQuece.inTransaction { (db, nil) in
+                do {
+                    for S in self.delegate!.SQLsyntaxs{
+                        try db!.executeUpdate(S, values: nil)
                     }
+                }catch{
+                    print("create error")
+                    print(error)
                 }
-                dbQuece = FMDatabaseQueue(path: dbPath)
-            }else{
-                fatalError("Use createDB need Confrom Delegate 'var SQLsyntaxs : [String]' ")
             }
-            
         }else{
             dbQuece = FMDatabaseQueue(path: dbPath)
         }
@@ -75,8 +68,8 @@ class SQLiteManager: NSObject {
     
     
     /// load SQLite File with Path(first time will copy form resourcePath)
-    func loadDB(){
-
+    public func loadDB(){
+        
         let dbPath = NSHomeDirectory().appending("/Documents" + delegate!.dbPathName)
         
         let defaultPath = Bundle.main.resourcePath!.appending(delegate!.dbPathName)
@@ -90,11 +83,17 @@ class SQLiteManager: NSObject {
         dbQuece = FMDatabaseQueue(path: dbPath)
     }
     
+    public func closeDB(){
+        dbQuece.close()
+    }
+    
+    
+    
     /// instert One Record
     ///
     /// - parameter table: SQLite table Name
     /// - parameter data:  instert Data with Dictionary
-    func instert(table:String,data:Dictionary<String,Any>){
+    public func instert(table:String,data:Dictionary<String,Any>){
         var name : String = ""
         var keys : String = ""
         var values : [Any] = []
@@ -118,7 +117,7 @@ class SQLiteManager: NSObject {
     ///
     /// - parameter table: SQLite table Name
     /// - parameter data:  instert Datas with Dictionarys
-    func instert(table:String,datas:[Dictionary<String,Any>]){
+    public func instert(table:String,datas:[Dictionary<String,Any>]){
         var SQLArray : [String] = [String]()
         var valuesArray : [[Any]] = []
         for dd in datas{
@@ -150,7 +149,7 @@ class SQLiteManager: NSObject {
     ///
     /// - parameter table: SQLite table Name
     /// - parameter data:  update Data with Dictionary
-    func update(table:String,data:Dictionary<String,Any>){
+    public func update(table:String,data:Dictionary<String,Any>){
         var name : String = ""
         var values : [Any] = []
         let primarykey : String = delegate!.tablePrimaryKey(table: table)
@@ -172,12 +171,12 @@ class SQLiteManager: NSObject {
             }
         }
     }
-
+    
     /// update Multiple Record
     ///
     /// - parameter table: SQLite table Name
     /// - parameter data:  update Datas with Dictionarys
-    func update(table:String,datas:[Dictionary<String,Any>]){
+    public func update(table:String,datas:[Dictionary<String,Any>]){
         let primarykey : String = delegate!.tablePrimaryKey(table: table)
         var SQLArray : [String] = [String]()
         var valuesArray : [[Any]] = []
@@ -207,12 +206,12 @@ class SQLiteManager: NSObject {
             }
         }
     }
-
+    
     /// delete One Record
     ///
     /// - parameter table: SQLite table Name
     /// - parameter data:  delete Data with Dictionary
-    func delete(table:String,data:Dictionary<String,Any>){
+    public func delete(table:String,data:Dictionary<String,Any>){
         let primarykey : String = delegate!.tablePrimaryKey(table: table)
         dbQuece.inDatabase { (db) in
             do {
@@ -228,7 +227,7 @@ class SQLiteManager: NSObject {
     ///
     /// - parameter table: SQLite table Name
     /// - parameter data:  delete Datas with Dictionarys
-    func delete(table:String,datas:[Dictionary<String,Any>]){
+    public func delete(table:String,datas:[Dictionary<String,Any>]){
         let primarykey : String = delegate!.tablePrimaryKey(table: table)
         dbQuece.inTransaction { (db, nil) in
             do {
@@ -241,12 +240,12 @@ class SQLiteManager: NSObject {
             }
         }
     }
-
+    
     /// delete the match condition data
     ///
     /// - parameter SQL:    SQL Syntax
     /// - parameter values: value with SQL Syntax
-    func deleteMatch(SQL:String,values:[Any]){
+    public func deleteMatch(SQL:String,values:[Any]){
         dbQuece.inDatabase { (db) in
             do {
                 try db!.executeUpdate(SQL, values: values)
@@ -263,7 +262,7 @@ class SQLiteManager: NSObject {
     /// delete the match SQLite table Name all data
     ///
     /// - parameter table: SQLite table Name
-    func deleteAll(table:String){
+    public func deleteAll(table:String){
         dbQuece.inDatabase { (db) in
             do {
                 try db?.executeUpdate("DELETE FROM \(table)", values: [])
@@ -279,22 +278,22 @@ class SQLiteManager: NSObject {
     /// - parameter table:  SQLite table Name
     /// - parameter Whree:  conditon
     /// - parameter values: value with SQL Syntax
-    func delete(table:String,Whree:String,values:[Any]){
+    public func delete(table:String,match:String,values:[Any]){
         dbQuece.inDatabase { (db) in
             do {
-                try db!.executeUpdate("DELETE FROM \(table) WHERE \(Whree)", values: values)
+                try db!.executeUpdate("DELETE FROM \(table) WHERE \(match)", values: values)
             }catch{
                 print("delete error")
                 print(error)
             }
         }
     }
-
+    
     
     /// lodaing the match SQLite table Name all data
     ///
     /// - parameter table: SQLite table Name
-    func loadAll(table:String)->[Dictionary<String,Any>]{
+    public func loadAll(table:String)->[Dictionary<String,Any>]{
         var data : [Dictionary<String,Any>] = [Dictionary<String,Any>]()
         dbQuece.inDatabase { (db) in
             do {
@@ -320,7 +319,7 @@ class SQLiteManager: NSObject {
     /// - parameter value:    value with SQL Syntax
     ///
     /// - returns: load the match condition datas
-    func loadMatch(Allmatch:String,value:[Any])->[Dictionary<String,Any>]{
+    public func loadMatch(Allmatch:String,value:[Any])->[Dictionary<String,Any>]{
         var data : [Dictionary<String,Any>] = [Dictionary<String,Any>]()
         dbQuece.inDatabase { (db) in
             do {
@@ -346,7 +345,7 @@ class SQLiteManager: NSObject {
     /// - parameter value: value with SQL Syntax
     ///
     /// - returns: load the match condition datas with SQL table
-    func loadMatch(table:String,match:String,value:[Any])->[Dictionary<String,Any>]{
+    public func loadMatch(table:String,match:String,value:[Any])->[Dictionary<String,Any>]{
         var data : [Dictionary<String,Any>] = [Dictionary<String,Any>]()
         dbQuece.inDatabase { (db) in
             do {
@@ -370,7 +369,7 @@ class SQLiteManager: NSObject {
     /// - Parameters:
     /// - process: SQL Syntax
     /// - value: value with SQL Syntax
-    func opertion(process:String,value:[Any]){
+    public func opertion(process:String,value:[Any]){
         dbQuece.inTransaction { (db, nil) in
             do {
                 try db!.executeUpdate(process, values: value)
@@ -386,18 +385,19 @@ class SQLiteManager: NSObject {
     /// - Table: tableName
     /// - Column: columnName
     /// - Returns: isHave
-    func checkTableColumn(table Table:String,Column:String)->Bool{
+    public func checkTableColumn(table Table:String,Column:String)->Bool{
         let tables = self.loadMatch(Allmatch: "SELECT * FROM sqlite_master", value: [])
         return tables.contains{ "\($0["name"]!)" == Table && "\($0["sql"]!)".contains(Column)}
     }
+    
     /// conform Database has table
     ///
     /// - Parameters:
     /// - Table: tableName
     /// - Returns: isHave
-    func checkTable(table Table:String)->Bool{
+    public func checkTable(table Table:String)->Bool{
         let tables = self.loadMatch(Allmatch: "SELECT * FROM sqlite_master", value: [])
         return tables.contains{ "\($0["name"]!)" == Table }
     }
-
+    
 }
