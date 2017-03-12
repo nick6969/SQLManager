@@ -9,25 +9,25 @@
 import UIKit
 
 /*
- //範例
- var SQLsyntaxs: [String] = [
- 
- SQLite(create: "user")
- .cloumn("id").INTEGER.PRIMARYKEY.AUTOINCREMENT.NOTNULL
- .cloumn("name").TEXT
- .cloumn("gender").TEXT
- .cloumn("age").INTEGER
- .cloumn("addres").TEXT
- .value ,
- SQLite(create: "postcode")
- .cloumn("id").INTEGER.PRIMARYKEY.AUTOINCREMENT.NOTNULL
- .cloumn("country").TEXT
- .cloumn("city").TEXT
- .cloumn("township").TEXT
- .cloumn("code").INTEGER
- .value
- ]
- // */
+//範例
+    var SQLsyntaxs: [String] = [
+        
+        SQLite(create: "user")
+            .cloumn("id").INTEGER.PRIMARYKEY.AUTOINCREMENT.NOTNULL
+            .cloumn("name").TEXT
+            .cloumn("gender").TEXT
+            .cloumn("age").INTEGER
+            .cloumn("addres").TEXT
+            .value ,
+        SQLite(create: "postcode")
+            .cloumn("id").INTEGER.PRIMARYKEY.AUTOINCREMENT.NOTNULL
+            .cloumn("country").TEXT
+            .cloumn("city").TEXT
+            .cloumn("township").TEXT
+            .cloumn("code").INTEGER
+            .value
+    ]
+// */
 
 /// MARK:- SQLite Syntax Help
 final public class SQLite {

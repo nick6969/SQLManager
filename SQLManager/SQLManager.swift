@@ -27,8 +27,8 @@ public protocol SQLDelegate {
 /// Quick use SQLite Datebase , init need have some class conform SQLDelegate
 public class SQLiteManager: NSObject {
     /*
-     You need init form init(delegate: protocol<SQLDelegate>)
-     */
+        You need init form init(delegate: protocol<SQLDelegate>)
+    */
     
     private var delegate : SQLDelegate?
     private var dbQuece: FMDatabaseQueue!
@@ -43,7 +43,7 @@ public class SQLiteManager: NSObject {
     private override init() {
         fatalError("You Need Use 'init(delegate:)'")
     }
-    
+  
     
     /// load SQLite File with Path(first time will create form SQLsyntaxs)
     /// need Confrom Delegate 'var SQLsyntaxs : [String]' "
@@ -69,7 +69,7 @@ public class SQLiteManager: NSObject {
     
     /// load SQLite File with Path(first time will copy form resourcePath)
     public func loadDB(){
-        
+
         let dbPath = NSHomeDirectory().appending("/Documents" + delegate!.dbPathName)
         
         let defaultPath = Bundle.main.resourcePath!.appending(delegate!.dbPathName)
@@ -86,7 +86,7 @@ public class SQLiteManager: NSObject {
     public func closeDB(){
         dbQuece.close()
     }
-    
+
     
     
     /// instert One Record
@@ -171,7 +171,7 @@ public class SQLiteManager: NSObject {
             }
         }
     }
-    
+
     /// update Multiple Record
     ///
     /// - parameter table: SQLite table Name
@@ -206,7 +206,7 @@ public class SQLiteManager: NSObject {
             }
         }
     }
-    
+
     /// delete One Record
     ///
     /// - parameter table: SQLite table Name
@@ -240,7 +240,7 @@ public class SQLiteManager: NSObject {
             }
         }
     }
-    
+
     /// delete the match condition data
     ///
     /// - parameter SQL:    SQL Syntax
@@ -288,7 +288,7 @@ public class SQLiteManager: NSObject {
             }
         }
     }
-    
+
     
     /// lodaing the match SQLite table Name all data
     ///
@@ -399,5 +399,5 @@ public class SQLiteManager: NSObject {
         let tables = self.loadMatch(Allmatch: "SELECT * FROM sqlite_master", value: [])
         return tables.contains{ "\($0["name"]!)" == Table }
     }
-    
+
 }
