@@ -1,6 +1,0 @@
-framework module SQLManager {
-  umbrella header "SQLManager-umbrella.h"
-
-  export *
-  module * { export * }
-}
