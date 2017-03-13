@@ -1,0 +1,28 @@
+PODS:
+  - FBSnapshotTestCase (2.1.4):
+    - FBSnapshotTestCase/SwiftSupport (= 2.1.4)
+  - FBSnapshotTestCase/Core (2.1.4)
+  - FBSnapshotTestCase/SwiftSupport (2.1.4):
+    - FBSnapshotTestCase/Core
+  - FMDB (2.6.2):
+    - FMDB/standard (= 2.6.2)
+  - FMDB/standard (2.6.2)
+  - SQLManager (0.1.4):
+    - FMDB
+
+DEPENDENCIES:
+  - FBSnapshotTestCase
+  - SQLManager (from `../`)
+
+EXTERNAL SOURCES:
+  SQLManager:
+    :path: ../
+
+SPEC CHECKSUMS:
+  FBSnapshotTestCase: 094f9f314decbabe373b87cc339bea235a63e07a
+  FMDB: 854a0341b4726e53276f2a8996f06f1b80f9259a
+  SQLManager: e0772b413155f7d8d497447636de6ada80b93b01
+
+PODFILE CHECKSUM: e66d8cdc64fe436802dbcad7cc8996db51e12537
+
+COCOAPODS: 1.2.0

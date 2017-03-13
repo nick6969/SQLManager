@@ -1,0 +1,30 @@
+{
+  "name": "SQLManager",
+  "version": "0.1.4",
+  "summary": "用SQLite更簡潔好用的套件",
+  "homepage": "https://github.com/nick6969/SQLManager",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "nick6969": "hawhaw.ya@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/nick6969/SQLManager.git",
+    "tag": "0.1.4"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "SQLManager/Classes/**/*",
+  "frameworks": [
+    "UIKit",
+    "FMDB"
+  ],
+  "dependencies": {
+    "FMDB": [
+
+    ]
+  }
+}
