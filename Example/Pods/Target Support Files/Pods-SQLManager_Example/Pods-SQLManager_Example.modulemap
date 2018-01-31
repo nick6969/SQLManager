@@ -1,0 +1,6 @@
+framework module Pods_SQLManager_Example {
+  umbrella header "Pods-SQLManager_Example-umbrella.h"
+
+  export *
+  module * { export * }
+}

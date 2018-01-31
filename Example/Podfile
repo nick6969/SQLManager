@@ -1,0 +1,15 @@
+use_frameworks!
+
+target 'SQLManager_Example' do
+  pod 'SQLManager', :path => '../'
+
+  target 'SQLManager_Tests' do
+    inherit! :search_paths
+
+    pod 'Quick', '~> 1.2.0'
+    pod 'Nimble', '~> 7.0.2'
+    pod 'FBSnapshotTestCase' , '~> 2.1.4'
+    pod 'Nimble-Snapshots' , '~> 6.3.0'
+    pod 'FMDB' , '2.6.2'
+  end
+end
