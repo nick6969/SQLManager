@@ -16,10 +16,10 @@ public protocol SQLDelegate: class {
 }
 
 public class SQLiteManager: NSObject {
-    // swiftlint:disable weak_delegate
+
     fileprivate var delegate: SQLDelegate?
-    // swiftlint:enable weak_delegate
-    fileprivate var dbQuece: FMDatabaseQueue!
+
+    fileprivate var dbQueue: FMDatabaseQueue!
 
     public init(delegate: SQLDelegate) {
         super.init()
@@ -33,13 +33,13 @@ public class SQLiteManager: NSObject {
     public func createDB() {
         let dbPath = NSHomeDirectory().appending("/Documents" + (delegate?.dbPathName ?? String()))
         if !FileManager.default.fileExists(atPath: dbPath) {
-            dbQuece = FMDatabaseQueue(path: dbPath)
+            dbQueue = FMDatabaseQueue(path: dbPath)
             guard let syntaxs = delegate?.SQLsyntaxs else { return }
-            dbQuece.inTransaction { (datebase, _) in
-                guard let datebase = datebase  else { return }
+            dbQueue.inTransaction { (database, _) in
+                guard let database = database else { return }
                 do {
                     for S in syntaxs {
-                        try datebase.executeUpdate(S, values: nil)
+                        try database.executeUpdate(S, values: nil)
                     }
                 } catch {
                     print("create error")
@@ -47,7 +47,7 @@ public class SQLiteManager: NSObject {
                 }
             }
         } else {
-            dbQuece = FMDatabaseQueue(path: dbPath)
+            dbQueue = FMDatabaseQueue(path: dbPath)
         }
     }
 
@@ -65,15 +65,15 @@ public class SQLiteManager: NSObject {
                 print(error)
             }
         }
-        dbQuece = FMDatabaseQueue(path: dbPath)
+        dbQueue = FMDatabaseQueue(path: dbPath)
     }
 
     public func closeDB() {
-        dbQuece.close()
+        dbQueue.close()
     }
 
-    public func opertion(process: String, value: [Any]) {
-        dbQuece.inTransaction { (database, _) in
+    public func operation(process: String, value: [Any]) {
+        dbQueue.inTransaction { (database, _) in
             guard let database = database else { return }
             do {
                 try database.executeUpdate(process, values: value)
@@ -85,12 +85,12 @@ public class SQLiteManager: NSObject {
     }
 
     public func checkTableColumn(table: String, column: String) -> Bool {
-        let tables = self.loadMatch(allmatch: "SELECT * FROM sqlite_master", value: [])
+        let tables = self.loadMatch(allMatch: "SELECT * FROM sqlite_master", value: [])
         return tables.contains { "\($0["name"]!)" == table && "\($0["sql"]!)".contains(column)}
     }
 
     public func checkTable(table: String) -> Bool {
-        let tables = self.loadMatch(allmatch: "SELECT * FROM sqlite_master", value: [])
+        let tables = self.loadMatch(allMatch: "SELECT * FROM sqlite_master", value: [])
         return tables.contains { "\($0["name"]!)" == table }
     }
 
@@ -100,7 +100,7 @@ public class SQLiteManager: NSObject {
 public extension SQLiteManager {
     public func loadAll(table: String) -> [[String: Any]] {
         var data: [[String: Any]] = []
-        dbQuece.inDatabase { database in
+        dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
                 let rs = try database.executeQuery("SELECT * FROM \(table)", values: nil)
@@ -122,12 +122,12 @@ public extension SQLiteManager {
         return data
     }
 
-    public func loadMatch(allmatch: String, value: [Any]) -> [[String: Any]] {
+    public func loadMatch(allMatch: String, value: [Any]) -> [[String: Any]] {
         var data: [[String: Any]] = []
-        dbQuece.inDatabase { database in
+        dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
-                let rs = try database.executeQuery(allmatch, values: value)
+                let rs = try database.executeQuery(allMatch, values: value)
                 while rs.next() {
                     var dd = [String: Any]()
                     for (key, index) in  rs.columnNameToIndexMap {
@@ -147,7 +147,7 @@ public extension SQLiteManager {
 
     public func loadMatch(table: String, match: String, value: [Any]) -> [[String: Any]] {
         var data: [[String: Any]] = []
-        dbQuece.inDatabase { (database) in
+        dbQueue.inDatabase { (database) in
             guard let database = database else { return }
             do {
                 let rs = try database.executeQuery("SELECT * FROM \(table) WHERE " + match, values: value)
@@ -170,9 +170,9 @@ public extension SQLiteManager {
     }
 }
 
-// MARK: - Instert
+// MARK: - Insert
 public extension SQLiteManager {
-    public func instert(table: String, data: [String: Any]) {
+    public func insert(table: String, data: [String: Any]) {
         var name: String = String()
         var keys: String = String()
         var values: [Any] = []
@@ -187,18 +187,18 @@ public extension SQLiteManager {
         } else {
             SQL = "INSERT INTO \(table) \(name)) values \(keys))"
         }
-        dbQuece.inDatabase { database in
+        dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
                 try database.executeUpdate(SQL, values: values)
             } catch {
-                print("instert error")
+                print("insert error")
                 print(error)
             }
         }
     }
 
-    public func instert(table: String, datas: [[String: Any]]) {
+    public func insert(table: String, datas: [[String: Any]]) {
         var SQLArray: [String] = [String]()
         var valuesArray: [[Any]] = []
         for dd in datas {
@@ -214,7 +214,7 @@ public extension SQLiteManager {
             valuesArray.append(values)
         }
 
-        dbQuece.inTransaction { (database, _) in
+        dbQueue.inTransaction { (database, _) in
             guard let database = database else { return }
             do {
                 for i in 0..<SQLArray.count {
@@ -233,17 +233,17 @@ public extension SQLiteManager {
     public func update(table: String, data: [String: Any]) {
         var name: String = String()
         var values: [Any] = []
-        guard let primarykey = delegate?.tablePrimaryKey(table: table) else { return }
-        for (offset: _, (key: key, value: value)) in data.enumerated() where key != primarykey {
+        guard let primaryKey = delegate?.tablePrimaryKey(table: table) else { return }
+        for (offset: _, (key: key, value: value)) in data.enumerated() where key != primaryKey {
             name += key + " = ? ,"
             values.append(value)
         }
         name.removeLast()
-        if let value = data[primarykey] {
+        if let value = data[primaryKey] {
             values.append(value)
         }
-        let SQL: String = "UPDATE \(table) SET \(name) WHERE \(primarykey) = ?"
-        dbQuece.inDatabase { database in
+        let SQL: String = "UPDATE \(table) SET \(name) WHERE \(primaryKey) = ?"
+        dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
                 try database.executeUpdate(SQL, values: values)
@@ -255,25 +255,25 @@ public extension SQLiteManager {
     }
 
     public func update(table: String, datas: [[String: Any]]) {
-        guard let primarykey = delegate?.tablePrimaryKey(table: table) else { return }
+        guard let primaryKey = delegate?.tablePrimaryKey(table: table) else { return }
         var SQLArray: [String] = [String]()
         var valuesArray: [[Any]] = []
         for dd in datas {
             var name: String = String()
             var values: [Any] = []
-            for (offset: _, (key: key, value: value)) in dd.enumerated() where key != primarykey {
+            for (offset: _, (key: key, value: value)) in dd.enumerated() where key != primaryKey {
                 name += key + " = ? ,"
                 values.append(value)
             }
             name.removeLast()
-            if let value = dd[primarykey] {
+            if let value = dd[primaryKey] {
                 values.append(value)
             }
-            SQLArray.append("UPDATE \(table) SET \(name) WHERE \(primarykey) = ?")
+            SQLArray.append("UPDATE \(table) SET \(name) WHERE \(primaryKey) = ?")
             valuesArray.append(values)
         }
 
-        dbQuece.inTransaction { (database, _) in
+        dbQueue.inTransaction { (database, _) in
             guard let database = database else { return }
             do {
                 for i in 0..<SQLArray.count {
@@ -290,12 +290,12 @@ public extension SQLiteManager {
 // MARK: - Delete
 public extension SQLiteManager {
     public func delete(table: String, data: [String: Any]) {
-        guard let primarykey = delegate?.tablePrimaryKey(table: table) else { return }
-        dbQuece.inDatabase { (database) in
+        guard let primaryKey = delegate?.tablePrimaryKey(table: table) else { return }
+        dbQueue.inDatabase { (database) in
             guard let database = database else { return }
-            guard let value = data[primarykey] else { return }
+            guard let value = data[primaryKey] else { return }
             do {
-                try database.executeUpdate("DELETE FROM \(table) WHERE \(primarykey) = ?", values: [value])
+                try database.executeUpdate("DELETE FROM \(table) WHERE \(primaryKey) = ?", values: [value])
             } catch {
                 print("delete error")
                 print(error)
@@ -304,13 +304,13 @@ public extension SQLiteManager {
     }
 
     public func delete(table: String, datas: [[String: Any]]) {
-        guard let primarykey = delegate?.tablePrimaryKey(table: table) else { return }
-        dbQuece.inTransaction { (database, _) in
+        guard let primaryKey = delegate?.tablePrimaryKey(table: table) else { return }
+        dbQueue.inTransaction { (database, _) in
             guard let database = database else { return }
             do {
                 for data in datas {
-                    guard let value = data[primarykey] else { continue }
-                    try database.executeUpdate("DELETE FROM \(table) WHERE \(primarykey) = ?", values: [value])
+                    guard let value = data[primaryKey] else { continue }
+                    try database.executeUpdate("DELETE FROM \(table) WHERE \(primaryKey) = ?", values: [value])
                 }
             } catch {
                 print("delete error")
@@ -320,7 +320,7 @@ public extension SQLiteManager {
     }
 
     public func deleteMatch(SQL: String, values: [Any]) {
-        dbQuece.inDatabase { database in
+        dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
                 try database.executeUpdate(SQL, values: values)
@@ -332,7 +332,7 @@ public extension SQLiteManager {
     }
 
     public func deleteAll(table: String) {
-        dbQuece.inDatabase { database in
+        dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
                 try database.executeUpdate("DELETE FROM \(table)", values: [])
@@ -344,7 +344,7 @@ public extension SQLiteManager {
     }
 
     public func delete(table: String, match: String, values: [Any]) {
-        dbQuece.inDatabase { database in
+        dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
                 try database.executeUpdate("DELETE FROM \(table) WHERE \(match)", values: values)
