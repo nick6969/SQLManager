@@ -98,7 +98,7 @@ public class SQLiteManager: NSObject {
 
 // MARK: - Load
 public extension SQLiteManager {
-    public func loadAll(table: String) -> [[String: Any]] {
+    func loadAll(table: String) -> [[String: Any]] {
         var data: [[String: Any]] = []
         dbQueue.inDatabase { database in
             guard let database = database else { return }
@@ -122,7 +122,7 @@ public extension SQLiteManager {
         return data
     }
 
-    public func loadMatch(allMatch: String, value: [Any]) -> [[String: Any]] {
+    func loadMatch(allMatch: String, value: [Any]) -> [[String: Any]] {
         var data: [[String: Any]] = []
         dbQueue.inDatabase { database in
             guard let database = database else { return }
@@ -145,7 +145,7 @@ public extension SQLiteManager {
         return data
     }
 
-    public func loadMatch(table: String, match: String, value: [Any]) -> [[String: Any]] {
+    func loadMatch(table: String, match: String, value: [Any]) -> [[String: Any]] {
         var data: [[String: Any]] = []
         dbQueue.inDatabase { (database) in
             guard let database = database else { return }
@@ -172,7 +172,7 @@ public extension SQLiteManager {
 
 // MARK: - Insert
 public extension SQLiteManager {
-    public func insert(table: String, data: [String: Any]) {
+    func insert(table: String, data: [String: Any]) {
         var name: String = String()
         var keys: String = String()
         var values: [Any] = []
@@ -198,7 +198,7 @@ public extension SQLiteManager {
         }
     }
 
-    public func insert(table: String, datas: [[String: Any]]) {
+    func insert(table: String, datas: [[String: Any]]) {
         var SQLArray: [String] = [String]()
         var valuesArray: [[Any]] = []
         for dd in datas {
@@ -230,7 +230,7 @@ public extension SQLiteManager {
 
 // MARK: - Update
 public extension SQLiteManager {
-    public func update(table: String, data: [String: Any]) {
+    func update(table: String, data: [String: Any]) {
         var name: String = String()
         var values: [Any] = []
         guard let primaryKey = delegate?.tablePrimaryKey(table: table) else { return }
@@ -254,7 +254,7 @@ public extension SQLiteManager {
         }
     }
 
-    public func update(table: String, datas: [[String: Any]]) {
+    func update(table: String, datas: [[String: Any]]) {
         guard let primaryKey = delegate?.tablePrimaryKey(table: table) else { return }
         var SQLArray: [String] = [String]()
         var valuesArray: [[Any]] = []
@@ -289,7 +289,7 @@ public extension SQLiteManager {
 
 // MARK: - Delete
 public extension SQLiteManager {
-    public func delete(table: String, data: [String: Any]) {
+    func delete(table: String, data: [String: Any]) {
         guard let primaryKey = delegate?.tablePrimaryKey(table: table) else { return }
         dbQueue.inDatabase { (database) in
             guard let database = database else { return }
@@ -303,7 +303,7 @@ public extension SQLiteManager {
         }
     }
 
-    public func delete(table: String, datas: [[String: Any]]) {
+    func delete(table: String, datas: [[String: Any]]) {
         guard let primaryKey = delegate?.tablePrimaryKey(table: table) else { return }
         dbQueue.inTransaction { (database, _) in
             guard let database = database else { return }
@@ -319,7 +319,7 @@ public extension SQLiteManager {
         }
     }
 
-    public func deleteMatch(SQL: String, values: [Any]) {
+    func deleteMatch(SQL: String, values: [Any]) {
         dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
@@ -331,7 +331,7 @@ public extension SQLiteManager {
         }
     }
 
-    public func deleteAll(table: String) {
+    func deleteAll(table: String) {
         dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {
@@ -343,7 +343,7 @@ public extension SQLiteManager {
         }
     }
 
-    public func delete(table: String, match: String, values: [Any]) {
+    func delete(table: String, match: String, values: [Any]) {
         dbQueue.inDatabase { database in
             guard let database = database else { return }
             do {

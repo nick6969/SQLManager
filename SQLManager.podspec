@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'SQLManager'
-  s.version          = '0.1.5'
+  s.version          = '0.1.6'
   s.summary          = 'Quick Opertion SQLite CRUD'
 
   s.description      = <<-DESC
@@ -19,8 +19,8 @@ TODO: Add long description of the pod here.
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'hawhaw.ya@gmail.com' => 'hawhaw.ya@gmail.com' }
   s.source           = { :git => 'https://github.com/nick6969/SQLManager.git', :tag => s.version.to_s }
-  s.swift_version    = "3.2"
-  s.ios.deployment_target = '8.0'
+  s.swift_version    = "4.2"
+  s.ios.deployment_target = '11.0'
 
   s.source_files = 'SQLManager/Classes/**/*'
   

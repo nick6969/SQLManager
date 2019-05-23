@@ -1,6 +1,6 @@
 {
   "name": "SQLManager",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "summary": "Quick Opertion SQLite CRUD",
   "description": "TODO: Add long description of the pod here.",
   "homepage": "https://github.com/nick6969/SQLManager",
@@ -13,16 +13,17 @@
   },
   "source": {
     "git": "https://github.com/nick6969/SQLManager.git",
-    "tag": "0.1.0"
+    "tag": "0.1.6"
   },
-  "swift_version": "3.2",
+  "swift_versions": "5.0",
   "platforms": {
-    "ios": "8.0"
+    "ios": "11.0"
   },
   "source_files": "SQLManager/Classes/**/*",
   "dependencies": {
     "FMDB": [
       "2.6.2"
     ]
-  }
+  },
+  "swift_version": "5.0"
 }
