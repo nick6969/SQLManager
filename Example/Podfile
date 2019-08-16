@@ -1,4 +1,9 @@
+
+platform :ios, '11.0'
+
 use_frameworks!
+
+inhibit_all_warnings!
 
 target 'SQLManager_Example' do
   pod 'SQLManager', :path => '../'

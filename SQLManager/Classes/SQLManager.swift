@@ -11,7 +11,7 @@ import FMDB
 public protocol SQLDelegate: class {
 
     func tablePrimaryKey(table: String) -> String
-    var SQLsyntaxs: [String] { get }
+    var sqlSyntaxs: [String] { get }
     var dbPathName: String { get }
 }
 
@@ -34,7 +34,7 @@ public class SQLiteManager: NSObject {
         let dbPath = NSHomeDirectory().appending("/Documents" + (delegate?.dbPathName ?? String()))
         if !FileManager.default.fileExists(atPath: dbPath) {
             dbQueue = FMDatabaseQueue(path: dbPath)
-            guard let syntaxs = delegate?.SQLsyntaxs else { return }
+            guard let syntaxs = delegate?.sqlSyntaxs else { return }
             dbQueue.inTransaction { (database, _) in
                 guard let database = database else { return }
                 do {
